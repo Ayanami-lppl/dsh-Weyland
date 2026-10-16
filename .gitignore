@@ -1,0 +1,10 @@
+# 你自己的机器配置，不要提交
+config.json
+
+# Windows 快捷方式及其备份
+*.lnk
+*.lnk.bak
+
+# Python
+__pycache__/
+*.py[cod]

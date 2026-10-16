@@ -1,0 +1,465 @@
+/* ══════════════════════════════════════════════════════════════
+   WEYLAND-YUTANI  ·  CRT boot sequence
+   total run time: 8000ms  (see splash.js --dur)
+   ══════════════════════════════════════════════════════════════ */
+
+@property --pct { syntax: "<integer>"; initial-value: 0; inherits: true; }
+
+:root {
+  --ph:      #7dffb4;   /* phosphor green        */
+  --ph-hi:   #d6ffe9;   /* over-driven phosphor  */
+  --ph-dim:  #2c8a5c;
+  --ph-ghost:#0d3a26;
+  --bg:      #020503;
+  --crt:     8000ms;    /* master duration       */
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #000;
+  cursor: none;
+}
+
+body {
+  font-family: Bahnschrift, "Segoe UI Variable Display", "Segoe UI", sans-serif;
+  color: var(--ph);
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+}
+
+/* ── the tube ──────────────────────────────────────────────── */
+
+.screen {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  transform-origin: 50% 50%;
+  background:
+    radial-gradient(120% 90% at 50% 48%, #061a11 0%, #030a07 55%, #000 100%);
+  animation: screen-life var(--crt) linear both;
+}
+
+/* power-on sweep → hold → power-off collapse */
+@keyframes screen-life {
+  0%,  3%   { transform: scaleY(0.004); opacity: 0; filter: brightness(7)  blur(1.2px); }
+  4%        { transform: scaleY(0.006); opacity: 1; filter: brightness(7)  blur(1.2px); }
+  8%        { transform: scaleY(0.10);  opacity: 1; filter: brightness(5)  blur(0.6px); }
+  12%       { transform: scaleY(1);     opacity: 1; filter: brightness(2.4) blur(0.3px); }
+  19%       { transform: scaleY(1);     opacity: 1; filter: brightness(1)   blur(0); }
+  88%       { transform: scaleY(1);     opacity: 1; filter: brightness(1)   blur(0); }
+  93%       { transform: scaleY(0.012); opacity: 1; filter: brightness(4)   blur(0.7px); }
+  97%       { transform: scaleY(0.003); opacity: 1; filter: brightness(9)   blur(1.4px); }
+  100%      { transform: scaleY(0.001); opacity: 0; filter: brightness(9)   blur(1.4px); }
+}
+
+/* the white dot a CRT leaves when it dies — sits outside .screen so the
+   collapse of the tube doesn't flatten it into the line */
+.fx-poweroff {
+  position: fixed;
+  background: radial-gradient(circle at 50% 50%,
+    #fff 0%, rgba(190,255,220,.9) 12%, rgba(125,255,180,.45) 26%, transparent 46%);
+  opacity: 0;
+  animation: dot-death var(--crt) linear both;
+}
+@keyframes dot-death {
+  0%,  92%  { opacity: 0;    transform: scale(3.2); }
+  93.5%     { opacity: 1;    transform: scale(1.5); }
+  95.5%     { opacity: .95;  transform: scale(1); }
+  97%       { opacity: .55;  transform: scale(1.9); }
+  99%       { opacity: .16;  transform: scale(3.2); }
+  100%      { opacity: 0;    transform: scale(4.2); }
+}
+
+/* ── corner HUD ────────────────────────────────────────────── */
+
+.hud {
+  position: absolute;
+  top: 4.2vh;
+  font-family: Consolas, "Cascadia Mono", monospace;
+  font-size: clamp(9px, min(1.05vh, 1vw), 15px);
+  letter-spacing: .34em;
+  color: var(--ph-dim);
+  opacity: 0;
+  animation: fade-in 600ms 1400ms ease-out both;
+  text-shadow: 0 0 8px rgba(125,255,180,.5);
+}
+.hud-tl { left: 4.2vh; }
+.hud-tr { right: 4.2vh; animation-delay: 1560ms; }
+
+@keyframes fade-in { from { opacity: 0 } to { opacity: .72 } }
+
+/* ── centre lockup ─────────────────────────────────────────── */
+
+.lockup {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2.6vh;
+  padding-bottom: 3vh;
+  animation: lockup-glitch 8000ms linear both;
+}
+
+/* RGB tear bursts: 51–55% of the run */
+@keyframes lockup-glitch {
+  0%, 50.5% { transform: translateX(0) }
+  51.2%     { transform: translateX(-9px) skewX(-1.4deg) }
+  51.9%     { transform: translateX(7px)  skewX(1deg) }
+  52.6%     { transform: translateX(-4px) }
+  53.3%     { transform: translateX(3px) skewX(.6deg) }
+  54.1%     { transform: translateX(0) }
+  56.4%     { transform: translateX(0) }
+  56.9%     { transform: translateX(-5px) }
+  57.4%,100%{ transform: translateX(0) }
+}
+
+/* ── the mark ──────────────────────────────────────────────── */
+
+.glyphwrap {
+  position: relative;
+  width: min(30vh, 26vw);
+  aspect-ratio: 1;
+}
+
+.mark {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  color: var(--ph);
+  overflow: visible;
+}
+
+.mark .p {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 6.5;
+  stroke-linecap: square;
+  stroke-linejoin: miter;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: draw 900ms cubic-bezier(.35,.8,.35,1) both;
+}
+@keyframes draw { from { stroke-dashoffset: 1 } to { stroke-dashoffset: 0 } }
+
+/* badge ring + ticks draw first, 1000 → 2100ms */
+.badge .p:nth-child(1) { animation-delay: 1000ms; animation-duration: 1250ms; stroke-width: 4; opacity: .85 }
+.badge .p:nth-child(2) { animation-delay: 1150ms; animation-duration: 1250ms; stroke-width: 2.5; opacity: .5 }
+.badge .p:nth-child(3) { animation-delay: 1720ms; animation-duration: 260ms; stroke-width: 5 }
+.badge .p:nth-child(4) { animation-delay: 1780ms; animation-duration: 260ms; stroke-width: 5 }
+.badge .p:nth-child(5) { animation-delay: 1840ms; animation-duration: 260ms; stroke-width: 5 }
+.badge .p:nth-child(6) { animation-delay: 1900ms; animation-duration: 260ms; stroke-width: 5 }
+
+/* the W-Y monogram draws 1750 → 2900ms, then settles with a bloom */
+.wy .p:nth-child(1) { animation-delay: 1750ms; animation-duration: 1050ms; stroke-width: 8 }
+.wy .p:nth-child(2) { animation-delay: 2380ms; animation-duration: 620ms;  stroke-width: 8 }
+
+.mark-g { animation: mark-bloom var(--crt) linear both; }
+@keyframes mark-bloom {
+  0%, 34%   { filter: brightness(1) }
+  37%       { filter: brightness(2.5) }
+  42%       { filter: brightness(1) }
+  100%      { filter: brightness(1) }
+}
+
+/* chromatic-aberration ghosts, only visible during the tear bursts */
+.mark-r, .mark-c { opacity: 0; mix-blend-mode: screen; }
+.mark-r { color: #ff2d55; animation: ghost 8000ms linear both; --gx: -7px }
+.mark-c { color: #22d3ee; animation: ghost 8000ms linear both; --gx:  7px }
+
+@keyframes ghost {
+  0%,  35%   { opacity: 0;   transform: translateX(calc(var(--gx) * 1.6)) }
+  36%        { opacity: .5 }
+  40%        { opacity: .35 }
+  44%        { opacity: 0;   transform: translateX(0) }
+  50.5%      { opacity: 0 }
+  51.2%      { opacity: .85; transform: translateX(calc(var(--gx) * 1.5)) }
+  53.3%      { opacity: .6;  transform: translateX(calc(var(--gx) * .7)) }
+  54.1%      { opacity: 0;   transform: translateX(0) }
+  100%       { opacity: 0 }
+}
+
+/* ── wordmark ──────────────────────────────────────────────── */
+
+.wordmark {
+  display: flex;
+  align-items: center;
+  gap: 2.4vh;
+}
+
+.wm-text {
+  font-size: clamp(15px, min(5.4vh, 5.6vw), 78px);
+  font-weight: 600;
+  font-stretch: 87.5%;
+  white-space: nowrap;
+  color: var(--ph-hi);
+  text-shadow:
+    0 0 6px rgba(125,255,180,.9),
+    0 0 26px rgba(80,255,170,.55),
+    0 0 68px rgba(60,220,150,.3);
+  opacity: 0;
+  animation: wm-in 1500ms 2820ms cubic-bezier(.2,.85,.25,1) both;
+}
+@keyframes wm-in {
+  from { opacity: 0; letter-spacing: .54em; filter: blur(7px); }
+  30%  { opacity: .9 }
+  to   { opacity: 1; letter-spacing: .17em; filter: blur(0); }
+}
+
+.wm-rule {
+  display: block;
+  height: 1px;
+  width: min(16vh, 8vw);
+  background: linear-gradient(90deg, transparent, var(--ph), transparent);
+  box-shadow: 0 0 12px rgba(125,255,180,.7);
+  transform: scaleX(0);
+  animation: rule-in 700ms cubic-bezier(.2,.9,.3,1) both;
+}
+.wm-rule-l { transform-origin: right center; animation-delay: 3180ms }
+.wm-rule-r { transform-origin: left center;  animation-delay: 3180ms }
+@keyframes rule-in { from { transform: scaleX(0); opacity: 0 } to { transform: scaleX(1); opacity: .9 } }
+
+/* ── subline ───────────────────────────────────────────────── */
+
+.subline {
+  display: flex;
+  align-items: center;
+  gap: 1.6vh;
+  font-family: Consolas, "Cascadia Mono", monospace;
+  font-size: clamp(9px, min(1.65vh, 1.45vw), 24px);
+  letter-spacing: .42em;
+  white-space: nowrap;
+  opacity: 0;
+  animation: sub-in 900ms 3860ms ease-out both;
+}
+@keyframes sub-in { from { opacity: 0; transform: translateY(6px) } to { opacity: .9; transform: none } }
+
+.sub-corp { color: var(--ph); text-shadow: 0 0 10px rgba(125,255,180,.7) }
+.sub-dot  { color: var(--ph-ghost) }
+.sub-tag  { color: var(--ph-dim); letter-spacing: .5em }
+
+/* ── footer: boot log + signal readout ─────────────────────── */
+
+.footer {
+  position: absolute;
+  left: 4.2vh;
+  right: 4.2vh;
+  bottom: 4.6vh;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 2.4vh 6vw;
+  flex-wrap: wrap-reverse;
+  font-family: Consolas, "Cascadia Mono", monospace;
+  font-size: clamp(8px, min(1.32vh, 1.1vw), 19px);
+  letter-spacing: .06em;
+  color: var(--ph-dim);
+  text-shadow: 0 0 9px rgba(125,255,180,.45);
+}
+
+.bootlog {
+  min-width: 0;
+  line-height: 1.95;
+}
+
+.log {
+  position: relative;
+  white-space: nowrap;
+  padding-left: 1.35em;
+  padding-right: 8.5em;
+  opacity: 0;
+  animation: type 420ms steps(30, end) both;
+  animation-delay: var(--d);
+}
+.log::after {
+  content: "OK";
+  position: absolute;
+  right: 0;
+  color: var(--ph);
+}
+.log::before {
+  content: ">";
+  position: absolute;
+  left: 0;
+  color: var(--ph);
+}
+@keyframes type {
+  from { opacity: 1; clip-path: inset(0 100% 0 0) }
+  to   { opacity: 1; clip-path: inset(0 0 0 0) }
+}
+
+.caret {
+  display: inline-block;
+  width: .58em;
+  height: 1.05em;
+  margin-left: .1em;
+  background: var(--ph);
+  box-shadow: 0 0 10px rgba(125,255,180,.9);
+  opacity: 0;
+  animation: caret-in 200ms 6360ms steps(1) both,
+             caret-blink 900ms 6560ms steps(1) infinite;
+}
+@keyframes caret-in   { from { opacity: 0 } to { opacity: 1 } }
+@keyframes caret-blink{ 0%,50% { opacity: 1 } 50.01%,100% { opacity: 0 } }
+
+/* ── signal readout ────────────────────────────────────────── */
+
+.signal {
+  flex: 0 1 auto;
+  width: min(30vh, 26vw);
+  min-width: 150px;
+  letter-spacing: .3em;
+  opacity: 0;
+  animation: fade-in 400ms 4520ms ease-out both;
+}
+
+.sig-label { margin-bottom: .9vh }
+
+.sig-track {
+  position: relative;
+  height: 1.35em;
+  border: 1px solid var(--ph-ghost);
+  padding: 2px;
+}
+.sig-track::after {                       /* segment gaps over the fill */
+  content: "";
+  position: absolute;
+  inset: 2px;
+  background: repeating-linear-gradient(90deg, transparent 0 5px, #020503 5px 7px);
+  pointer-events: none;
+}
+.sig-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--ph-ghost), var(--ph));
+  box-shadow: 0 0 14px rgba(125,255,180,.75);
+  transform-origin: left center;
+  transform: scaleX(0);
+  animation: sig-up 1650ms 4600ms cubic-bezier(.3,.75,.4,1) both;
+}
+@keyframes sig-up { from { transform: scaleX(0) } to { transform: scaleX(1) } }
+
+.sig-read {
+  margin-top: .9vh;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1.5em;
+}
+
+.sig-pct::after {
+  counter-reset: pct var(--pct);
+  content: counter(pct) "%";
+}
+.sig-pct { animation: countup 1650ms 4600ms linear both }
+@keyframes countup { from { --pct: 0 } to { --pct: 100 } }
+
+.sig-lock {
+  color: var(--ph-hi);
+  letter-spacing: .42em;
+  text-shadow: 0 0 14px rgba(125,255,180,.9);
+  opacity: 0;
+  animation: locked 300ms 6270ms steps(1) both;
+}
+@keyframes locked { from { opacity: 0 } to { opacity: 1 } }
+
+/* ── CRT overlay stack ─────────────────────────────────────── */
+
+.fx { position: absolute; inset: 0; pointer-events: none }
+
+.fx-bloom {
+  background: radial-gradient(48% 38% at 50% 46%, rgba(90,255,180,.16), transparent 70%);
+  mix-blend-mode: screen;
+  animation: breathe 5.5s 1s ease-in-out infinite;
+}
+@keyframes breathe { 0%,100% { opacity: .55 } 50% { opacity: 1 } }
+
+.fx-scanband {
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(150,255,205,.008) 42%,
+    rgba(150,255,205,.075) 50%,
+    rgba(150,255,205,.008) 58%,
+    transparent 100%);
+  height: 42%;
+  mix-blend-mode: screen;
+  opacity: 0;
+  animation: band-sweep 7s 900ms linear infinite, fade-in 500ms 1100ms both;
+}
+@keyframes band-sweep {
+  from { transform: translateY(-130%) }
+  to   { transform: translateY(320%) }
+}
+
+.fx-scanlines {
+  background: repeating-linear-gradient(
+    180deg,
+    rgba(0,0,0,.62) 0px,
+    rgba(0,0,0,.62) 1px,
+    rgba(0,0,0,0)   1px,
+    rgba(0,0,0,0)   3px);
+  opacity: 0;
+  animation: fade-in 700ms 760ms ease-out both;
+}
+
+.fx-grain {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
+  mix-blend-mode: overlay;
+  opacity: 0;
+  animation: grain-move .38s steps(3) infinite, grain-amp 8000ms linear both;
+}
+@keyframes grain-move {
+  0%   { background-position: 0 0 }
+  33%  { background-position: -60px 40px }
+  66%  { background-position: 40px -70px }
+  100% { background-position: 0 0 }
+}
+@keyframes grain-amp {
+  0%,  3%  { opacity: 0 }
+  5%       { opacity: .55 }
+  12%      { opacity: .18 }
+  20%,100% { opacity: .11 }
+}
+
+/* the bright band that rolls through while the sync settles */
+.fx-roll {
+  background: linear-gradient(180deg, transparent 0%, rgba(255,255,255,.30) 50%, transparent 100%);
+  height: 18%;
+  mix-blend-mode: screen;
+  opacity: 0;
+  animation: roll 8000ms linear both, band-sweep 2.4s 300ms linear 2;
+}
+@keyframes roll {
+  0%,  3.4% { opacity: .9; transform: translateY(-140%) scaleY(.5) }
+  4.4%      { opacity: .75; transform: translateY(-20%)  scaleY(.7) }
+  5.2%      { opacity: .5;  transform: translateY(90%)   scaleY(1) }
+  7%        { opacity: .22; transform: translateY(230%)  scaleY(2) }
+  12%       { opacity: 0 }
+  50.8%     { opacity: 0;   transform: translateY(0) scaleY(.45) }
+  52%       { opacity: .55; transform: translateY(40%) scaleY(.6) }
+  53.4%     { opacity: .3;  transform: translateY(120%) scaleY(1.2) }
+  55%       { opacity: 0 }
+  100%      { opacity: 0 }
+}
+
+.fx-vignette {
+  background:
+    radial-gradient(115% 82% at 50% 50%, transparent 52%, rgba(0,0,0,.55) 82%, rgba(0,0,0,.95) 100%),
+    radial-gradient(88% 62% at 50% 48%, rgba(60,220,150,.05), transparent 60%);
+  opacity: 0;
+  animation: fade-in 900ms 900ms ease-out both;
+}
+
+/* ── reduced motion: hold the final frame, skip the tube effects ── */
+@media (prefers-reduced-motion: reduce) {
+  .screen, .fx-roll, .fx-grain { animation: none; opacity: 1; transform: none; filter: none }
+  .fx-scanband, .fx-bloom { animation: none; opacity: 0 }
+}

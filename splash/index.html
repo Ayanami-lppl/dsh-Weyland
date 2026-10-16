@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>WEYLAND-YUTANI</title>
+<link rel="stylesheet" href="splash.css">
+</head>
+<body>
+
+<div class="screen" id="screen">
+
+  <!-- ── corner HUD ─────────────────────────────────────────── -->
+  <div class="hud hud-tl">MU/TH/UR 6000</div>
+  <div class="hud hud-tr">180924609</div>
+
+  <!-- ── centre lockup ──────────────────────────────────────── -->
+  <div class="lockup">
+
+    <div class="glyphwrap">
+      <svg class="mark mark-r" viewBox="0 0 400 400" aria-hidden="true">
+        <g class="wy">
+          <path class="p" pathLength="1" d="M 88 152 L 148 300 L 200 190 L 252 300 L 312 152"/>
+          <path class="p" pathLength="1" d="M 170 106 L 200 190 L 230 106"/>
+        </g>
+      </svg>
+
+      <svg class="mark mark-c" viewBox="0 0 400 400" aria-hidden="true">
+        <g class="wy">
+          <path class="p" pathLength="1" d="M 88 152 L 148 300 L 200 190 L 252 300 L 312 152"/>
+          <path class="p" pathLength="1" d="M 170 106 L 200 190 L 230 106"/>
+        </g>
+      </svg>
+
+      <svg class="mark mark-g" viewBox="0 0 400 400" aria-hidden="true">
+        <defs>
+          <filter id="glow" x="-60%" y="-60%" width="220%" height="220%">
+            <feGaussianBlur stdDeviation="5" result="b"/>
+            <feMerge>
+              <feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
+        </defs>
+        <g class="badge" filter="url(#glow)">
+          <circle class="p" pathLength="1" cx="200" cy="200" r="178"/>
+          <circle class="p" pathLength="1" cx="200" cy="200" r="166"/>
+          <path class="p" pathLength="1" d="M 200 8 V 26"/>
+          <path class="p" pathLength="1" d="M 200 374 V 392"/>
+          <path class="p" pathLength="1" d="M 8 200 H 26"/>
+          <path class="p" pathLength="1" d="M 374 200 H 392"/>
+        </g>
+        <g class="wy" filter="url(#glow)">
+          <path class="p" pathLength="1" d="M 88 152 L 148 300 L 200 190 L 252 300 L 312 152"/>
+          <path class="p" pathLength="1" d="M 170 106 L 200 190 L 230 106"/>
+        </g>
+      </svg>
+    </div>
+
+    <div class="wordmark">
+      <span class="wm-rule wm-rule-l"></span>
+      <span class="wm-text">WEYLAND&#8202;-&#8202;YUTANI</span>
+      <span class="wm-rule wm-rule-r"></span>
+    </div>
+
+    <div class="subline">
+      <span class="sub-corp">CORP.</span>
+      <span class="sub-dot">/</span>
+      <span class="sub-tag">BUILDING BETTER WORLDS</span>
+    </div>
+  </div>
+
+  <!-- ── footer: boot log + signal readout ──────────────────── -->
+  <div class="footer">
+
+    <div class="bootlog">
+      <div class="log" style="--d:4350">MU/TH/UR 6000 LINK</div>
+      <div class="log" style="--d:4740">SPECIAL ORDER 937</div>
+      <div class="log" style="--d:5130">CREW BIOSIGN</div>
+      <div class="log" style="--d:5520">CARGO RETURN PROTOCOL</div>
+      <div class="log" style="--d:5910">WEYLAND-YUTANI CORP.</div>
+      <span class="caret"></span>
+    </div>
+
+    <div class="signal">
+      <div class="sig-label">SIGNAL</div>
+      <div class="sig-track"><div class="sig-fill"></div></div>
+      <div class="sig-read">
+        <span class="sig-lock">LOCKED</span>
+        <span class="sig-pct"></span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── CRT overlays (collapse with the tube) ──────────────── -->
+  <div class="fx fx-bloom"></div>
+  <div class="fx fx-scanband"></div>
+  <div class="fx fx-scanlines"></div>
+  <div class="fx fx-grain"></div>
+  <div class="fx fx-roll"></div>
+  <div class="fx fx-vignette"></div>
+
+</div>
+
+<!-- lives outside the tube so it survives the collapse -->
+<div class="fx fx-poweroff"></div>
+
+<script src="splash.js"></script>
+</body>
+</html>

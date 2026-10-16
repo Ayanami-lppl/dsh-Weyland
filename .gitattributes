@@ -1,0 +1,6 @@
+# 仓库里统一用 LF，避免跨平台 diffs 噪声
+* text=auto eol=lf
+
+*.gif binary
+*.png binary
+*.ico binary

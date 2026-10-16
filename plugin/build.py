@@ -80,6 +80,66 @@ window.__ModuleLoader__.load({
 \t\t}
 
 \t\t/**
+\t\t * The window's caption buttons are drawn by Windows over the page, so no
+\t\t * stylesheet can reach them. The app does repaint them itself though: its
+\t\t * preload keeps a hidden probe element whose computed background and text
+\t\t * colours it forwards over the `windows-appearance` IPC, which the main
+\t\t * process feeds straight into setTitleBarOverlay(). Restyling that probe
+\t\t * during the ident -- it is invisible, so nothing else notices -- and then
+\t\t * nudging an attribute the watcher observes, tints the buttons to match.
+\t\t */
+\t\tconst TITLEBAR_STYLE = {
+\t\t\tbackground: "rgba(0, 0, 0, 0)",
+\t\t\tsymbol: "#7dffb4",
+\t\t};
+
+\t\t/**
+\t\t * The probe is the only hidden fixed-position span the app parks in
+\t\t * <body>. It has to be remembered rather than looked up every time:
+\t\t * restyling it replaces the very marker that identifies it, so a fresh
+\t\t * lookup after the repaint would fail and the caption would never go
+\t\t * back to normal.
+\t\t */
+\t\tlet captionProbe = null;
+\t\tlet captionSaved = null;
+
+\t\tfunction findCaptionProbe() {
+\t\t\tif (captionProbe !== null && captionProbe.isConnected) return captionProbe;
+\t\t\tcaptionProbe = null;
+\t\t\tconst marked = document.querySelector('[style*="--dsw-specific-sidebar-fill"]');
+\t\t\tif (marked !== null) {
+\t\t\t\tcaptionProbe = marked;
+\t\t\t\treturn captionProbe;
+\t\t\t}
+\t\t\tif (document.body === null) return null;
+\t\t\tfor (const node of document.body.children) {
+\t\t\t\tif (node.tagName === "SPAN" &&
+\t\t\t\t\tnode.style.position === "fixed" &&
+\t\t\t\t\tnode.style.visibility === "hidden") {
+\t\t\t\t\tcaptionProbe = node;
+\t\t\t\t\treturn captionProbe;
+\t\t\t\t}
+\t\t\t}
+\t\t\treturn null;
+\t\t}
+
+\t\tfunction repaintCaption(active) {
+\t\t\tconst probe = active || captionSaved !== null ? findCaptionProbe() : null;
+\t\t\tif (probe === null) return;
+\t\t\tif (active) {
+\t\t\t\tif (captionSaved === null) captionSaved = probe.style.cssText;
+\t\t\t\tprobe.style.backgroundColor = TITLEBAR_STYLE.background;
+\t\t\t\tprobe.style.color = TITLEBAR_STYLE.symbol;
+\t\t\t} else {
+\t\t\t\tprobe.style.cssText = captionSaved;
+\t\t\t\tcaptionSaved = null;
+\t\t\t}
+\t\t\t// the watcher listens on body[style], not on the probe itself
+\t\t\tdocument.body.style.setProperty("--dsh-weyland-poke", "1");
+\t\t\tdocument.body.style.removeProperty("--dsh-weyland-poke");
+\t\t}
+
+\t\t/**
 \t\t * The overlay. Shadow DOM keeps the ident's own page-level rules from
 \t\t * touching the app around it, and the portal to <body> keeps an ancestor
 \t\t * with a transform from becoming the containing block for "fixed".
@@ -99,8 +159,18 @@ window.__ModuleLoader__.load({
 \t\t\t\tconst body = document.createElement("div");
 \t\t\t\tbody.innerHTML = MARKUP;
 \t\t\t\troot.append(style, body);
-\t\t\t\tconst timer = window.setTimeout(() => setGone(true), DURATION_MS + 60);
-\t\t\t\treturn () => window.clearTimeout(timer);
+\t\t\t\trepaintCaption(true);
+\t\t\t\t// returning null at the end of the ident only unmounts its DOM; the
+\t\t\t\t// component itself stays mounted, so its cleanup never runs. Put the
+\t\t\t\t// caption back here rather than relying on the cleanup alone.
+\t\t\t\tconst timer = window.setTimeout(() => {
+\t\t\t\t\trepaintCaption(false);
+\t\t\t\t\tsetGone(true);
+\t\t\t\t}, DURATION_MS + 60);
+\t\t\t\treturn () => {
+\t\t\t\t\twindow.clearTimeout(timer);
+\t\t\t\t\trepaintCaption(false);
+\t\t\t\t};
 \t\t\t}, []);
 
 \t\t\tif (gone) return null;

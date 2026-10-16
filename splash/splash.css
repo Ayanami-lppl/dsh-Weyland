@@ -79,7 +79,10 @@ body {
 
 .hud {
   position: absolute;
-  top: 4.2vh;
+  /* Clear of the app's native window controls: Electron reserves the top
+     40 CSS px on the right for them (titleBarOverlay.height), and nothing
+     in the page can paint over that strip. */
+  top: 56px;
   font-family: Consolas, "Cascadia Mono", monospace;
   font-size: clamp(9px, min(1.05vh, 1vw), 15px);
   letter-spacing: .34em;

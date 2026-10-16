@@ -1,0 +1,24 @@
+{
+  "name": "dsh-weyland-intro",
+  "version": "1.0.0",
+  "private": true,
+  "description": "The dsh-Weyland CRT boot ident for the DeepSeek Harness web client.",
+  "type": "module",
+  "main": "lib/index.js",
+  "exports": {
+    ".": {
+      "default": "./lib/index.js"
+    },
+    "./client": {
+      "default": "./lib/client.js"
+    },
+    "./package.json": {
+      "default": "./package.json"
+    }
+  },
+  "dsh": {
+    "client": {
+      "platform": "web"
+    }
+  }
+}

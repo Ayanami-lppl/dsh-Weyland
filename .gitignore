@@ -5,6 +5,9 @@ config.json
 *.lnk
 *.lnk.bak
 
+# 由 plugin/build.py 生成，不入库
+plugin/lib/client.js
+
 # Python
 __pycache__/
 *.py[cod]

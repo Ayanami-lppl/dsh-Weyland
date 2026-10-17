@@ -109,7 +109,7 @@ def drop_row(lines, name_at):
 
 
 def emblem_choice(argv):
-    """Which emblem to build: --emblem wins, then config.json, then circle."""
+    """Which emblem to build: --emblem wins, then config.json, then rotate."""
     if "--emblem" in argv:
         index = argv.index("--emblem")
         if index + 1 < len(argv):
@@ -117,11 +117,11 @@ def emblem_choice(argv):
     try:
         with open(CONFIG, "r", encoding="utf-8") as fh:
             value = (json.load(fh) or {}).get("emblem")
-        if value in ("circle", "corp"):
+        if value in ("rotate", "circle", "corp"):
             return value
     except Exception:
         pass
-    return "circle"
+    return "rotate"
 
 
 def install(profile, emblem):

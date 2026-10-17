@@ -56,6 +56,9 @@ window.__ModuleLoader__.load({
 \t\t/** Baked in at install time. False on a machine with no rival intro. */
 \t\tconst ALTERNATE = %(alternate)s;
 
+\t\t/** Baked in at install time: "rotate", or a pinned "corp" / "circle". */
+\t\tconst EMBLEM = %(emblem_js)s;
+
 \t\t/**
 \t\t * Which of the two boot intros owns this launch, when two share the
 \t\t * machine. Purely a function of the clock: the rival plugin computes the
@@ -74,9 +77,14 @@ window.__ModuleLoader__.load({
 \t\t\tx = (x ^ (x >>> 16)) >>> 0;
 \t\t\treturn x;
 \t\t}
-\t\tfunction introTurn() {
-\t\t\treturn turnMix(Math.floor(Date.now() / TURN_BUCKET_MS)) %% 2 === 0
-\t\t\t\t? "weyland" : "dsh";
+\t\t/** 0 and 1 are ours (corp and circle), 2 belongs to the rival card. */
+\t\tfunction introSlot() {
+\t\t\treturn turnMix(Math.floor(Date.now() / TURN_BUCKET_MS)) %% 3;
+\t\t}
+
+\t\tfunction chosenEmblem(slot) {
+\t\t\tif (EMBLEM !== "rotate") return EMBLEM;
+\t\t\treturn slot === 1 ? "circle" : "corp";
 \t\t}
 
 \t\t/**
@@ -144,7 +152,7 @@ window.__ModuleLoader__.load({
 \t\t * touching the app around it, and the portal to <body> keeps an ancestor
 \t\t * with a transform from becoming the containing block for "fixed".
 \t\t */
-\t\tfunction WeylandIntro() {
+\t\tfunction WeylandIntro(props) {
 \t\t\tconst hostRef = React.useRef(null);
 \t\t\tconst [gone, setGone] = React.useState(false);
 
@@ -157,7 +165,11 @@ window.__ModuleLoader__.load({
 \t\t\t\tconst style = document.createElement("style");
 \t\t\t\tstyle.textContent = CSS;
 \t\t\t\tconst body = document.createElement("div");
-\t\t\t\tbody.innerHTML = MARKUP;
+\t\t\t\t// swap the emblem before the markup enters the shadow tree, so no
+\t\t\t\t// frame is ever painted with the wrong one
+\t\t\t\tbody.innerHTML = props.emblem === null
+\t\t\t\t\t? MARKUP
+\t\t\t\t\t: MARKUP.replace(/data-emblem="[^"]*"/, 'data-emblem="' + props.emblem + '"');
 \t\t\t\troot.append(style, body);
 \t\t\t\trepaintCaption(true);
 \t\t\t\t// returning null at the end of the ident only unmounts its DOM; the
@@ -188,10 +200,13 @@ window.__ModuleLoader__.load({
 \t\t * @param ctx - Client root context.
 \t\t */
 \t\tfunction apply(ctx) {
-\t\t\tif (ALTERNATE && introTurn() !== "weyland") return;
+\t\t\tconst slot = introSlot();
+\t\t\tif (ALTERNATE && slot === 2) return;
+\t\t\tconst emblem = chosenEmblem(slot);
 \t\t\ttry {
 \t\t\t\tctx.slots.inject("shell.overlay", function* () {
-\t\t\t\t\tyield ctx.slots.register({ name: "shell.overlay", id: "weyland-intro" }, WeylandIntro);
+\t\t\t\t\tyield ctx.slots.register({ name: "shell.overlay", id: "weyland-intro" },
+\t\t\t\t\t\t() => React.createElement(WeylandIntro, { emblem: emblem }));
 \t\t\t\t});
 \t\t\t} catch (error) {
 \t\t\t\tconsole.error("dsh-weyland-intro: ident registration failed", error);
@@ -250,19 +265,20 @@ def render(alternate, emblem):
         "css": json.dumps(css, ensure_ascii=False),
         "duration": duration,
         "alternate": "true" if alternate else "false",
+        "emblem_js": json.dumps(emblem if emblem in ("rotate", "corp", "circle") else "rotate"),
     }
 
 
 def main():
     alternate = "--alternate" in sys.argv
-    emblem = "circle"
+    emblem = "rotate"
     if "--emblem" in sys.argv:
         index = sys.argv.index("--emblem")
         if index + 1 >= len(sys.argv):
             raise SystemExit("--emblem needs a value: circle or corp")
         emblem = sys.argv[index + 1]
-        if emblem not in ("circle", "corp"):
-            raise SystemExit("--emblem must be circle or corp")
+        if emblem not in ("rotate", "circle", "corp"):
+            raise SystemExit("--emblem must be rotate, circle or corp")
     out = render(alternate, emblem)
 
     print("source  :", SPLASH)

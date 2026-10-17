@@ -86,9 +86,27 @@ def load_config():
             cfg["warm_start_ms"] = int(cfg["warm_start_ms"])
         except Exception:
             cfg["warm_start_ms"] = None
-    emblem = str(cfg.get("emblem") or "circle").strip().lower()
-    cfg["emblem"] = emblem if emblem in ("circle", "corp") else "circle"
+    emblem = str(cfg.get("emblem") or "rotate").strip().lower()
+    cfg["emblem"] = emblem if emblem in ("rotate", "circle", "corp") else "rotate"
     return cfg
+
+
+def resolve_emblem(mode):
+    """The emblem this launch shows.
+
+    A pinned value wins. "rotate" takes turns by the same five-minute bucket
+    the plugins use -- two-way here, since this launcher has no rival intro
+    to hand a third slot to.
+    """
+    if mode in ("circle", "corp"):
+        return mode
+    value = int(time.time() // 300) & 0xFFFFFFFF
+    value ^= value >> 16
+    value = (value * 2246822507) & 0xFFFFFFFF
+    value ^= value >> 13
+    value = (value * 3266489909) & 0xFFFFFFFF
+    value ^= value >> 16
+    return "circle" if value % 2 else "corp"
 
 
 def launch_app(target):
@@ -138,7 +156,7 @@ def run_splash(cfg):
 
     # The page starts on the markup's default emblem; swap it as soon as the
     # page answers, which is before the mark is revealed at ~1s.
-    emblem = cfg.get("emblem", "circle")
+    emblem = resolve_emblem(cfg.get("emblem", "rotate"))
     if emblem != "circle":
         def apply_emblem():
             deadline = time.time() + 5

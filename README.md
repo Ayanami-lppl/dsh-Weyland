@@ -154,7 +154,7 @@ $s.Save()
 | `app` | string | `""` | 要启动的程序完整路径。支持 `~` 和 `%环境变量%`。留空或路径不存在时自动探测 |
 | `duration_ms` | number | `8000` | 动画时长（毫秒）。**修改时必须与 `splash/splash.css` 的时间轴一致** |
 | `warm_start_ms` | number \| null | `6900` | 在动画的第几毫秒**提前**把应用拉起来，这样动画结束时应用已经就绪。设为 `null` 则播完才启动 |
-| `emblem` | string | `"circle"` | 徽记样式：`circle`（圆环 + 字母组合）或 `corp`（企业方块标）。两种都内置在动画里，这个字段决定显示哪个 |
+| `emblem` | string | `"rotate"` | 徽记样式：`rotate`（两种轮流）／`corp`（方块标）／`circle`（圆环标）。两种都内置在动画里 |
 
 ---
 
@@ -166,13 +166,17 @@ $s.Save()
 
 | `emblem` | 样子 |
 | :--- | :--- |
-| `circle` | 圆环 + 四向刻度 + W-Y 字母组合（默认） |
-| `corp` | 企业方块标：黄色 W 楔形 + 三处负空间三角 |
+| `rotate` | **轮流**：方块标 ↔ 圆环标（默认） |
+| `corp` | 固定为企业方块标：黄色 W 楔形 + 三处负空间三角 |
+| `circle` | 固定为圆环 + 四向刻度 + W-Y 字母组合 |
 
 - **方式 A**：改 `config.json` 的 `emblem`，然后重跑一次 `python plugin/install.py`，重启应用。
   也可以临时指定：`python plugin/install.py --emblem corp`。
 - **方式 B**：改 `config.json` 的 `emblem`，重新启动器即可。
 - **浏览器预览**：`splash/index.html?emblem=corp&t=6800`
+
+> 装了另一个开场插件（`dsh-boot-intro`）时，总共有**三种画面**按时段轮换，各占约三分之一：
+> 绿色 + 方块标 / 绿色 + 圆环标 / 蓝色六边形。它由系统时钟决定，不存任何状态。
 
 ### 换荧光色
 

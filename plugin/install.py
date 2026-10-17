@@ -20,12 +20,14 @@ all of it.
 """
 
 import io
+import json
 import os
 import shutil
 import subprocess
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+CONFIG = os.path.join(HERE, os.pardir, "config.json")
 PLUGIN_NAME = "dsh-weyland-intro"
 RIVAL_NAME = "dsh-boot-intro"
 DEFAULT_PROFILE = os.path.join(os.path.expanduser("~"), ".dsh", "profiles", "desktop")
@@ -106,7 +108,23 @@ def drop_row(lines, name_at):
     return lines
 
 
-def install(profile):
+def emblem_choice(argv):
+    """Which emblem to build: --emblem wins, then config.json, then circle."""
+    if "--emblem" in argv:
+        index = argv.index("--emblem")
+        if index + 1 < len(argv):
+            return argv[index + 1]
+    try:
+        with open(CONFIG, "r", encoding="utf-8") as fh:
+            value = (json.load(fh) or {}).get("emblem")
+        if value in ("circle", "corp"):
+            return value
+    except Exception:
+        pass
+    return "circle"
+
+
+def install(profile, emblem):
     node_modules = os.path.join(profile, "node_modules")
     target = os.path.join(node_modules, PLUGIN_NAME)
     patch = os.path.join(profile, PATCH_NAME)
@@ -121,9 +139,10 @@ def install(profile):
     else:
         print("rival    : none -- this ident will play on every launch")
 
-    args = [sys.executable, os.path.join(HERE, "build.py")]
+    args = [sys.executable, os.path.join(HERE, "build.py"), "--emblem", emblem]
     if rival:
         args.append("--alternate")
+    print("emblem   : %s" % emblem)
     result = subprocess.run(args, capture_output=True, text=True)
     if result.returncode != 0:
         fail("build failed:\n" + result.stdout + result.stderr)
@@ -195,7 +214,7 @@ def main():
     if "--uninstall" in argv:
         uninstall(profile)
     else:
-        install(profile)
+        install(profile, emblem_choice(argv))
 
 
 if __name__ == "__main__":

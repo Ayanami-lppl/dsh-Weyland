@@ -16,22 +16,22 @@
   <!-- ── centre lockup ──────────────────────────────────────── -->
   <div class="lockup">
 
-    <div class="glyphwrap">
-      <svg class="mark mark-r" viewBox="0 0 400 400" aria-hidden="true">
+    <div class="glyphwrap" data-emblem="circle">
+      <svg class="mark mark-r mark-circle" viewBox="0 0 400 400" aria-hidden="true">
         <g class="wy">
           <path class="p" pathLength="1" d="M 88 152 L 148 300 L 200 190 L 252 300 L 312 152"/>
           <path class="p" pathLength="1" d="M 170 106 L 200 190 L 230 106"/>
         </g>
       </svg>
 
-      <svg class="mark mark-c" viewBox="0 0 400 400" aria-hidden="true">
+      <svg class="mark mark-c mark-circle" viewBox="0 0 400 400" aria-hidden="true">
         <g class="wy">
           <path class="p" pathLength="1" d="M 88 152 L 148 300 L 200 190 L 252 300 L 312 152"/>
           <path class="p" pathLength="1" d="M 170 106 L 200 190 L 230 106"/>
         </g>
       </svg>
 
-      <svg class="mark mark-g" viewBox="0 0 400 400" aria-hidden="true">
+      <svg class="mark mark-g mark-circle" viewBox="0 0 400 400" aria-hidden="true">
         <defs>
           <filter id="glow" x="-60%" y="-60%" width="220%" height="220%">
             <feGaussianBlur stdDeviation="5" result="b"/>
@@ -51,6 +51,24 @@
         <g class="wy" filter="url(#glow)">
           <path class="p" pathLength="1" d="M 88 152 L 148 300 L 200 190 L 252 300 L 312 152"/>
           <path class="p" pathLength="1" d="M 170 106 L 200 190 L 230 106"/>
+        </g>
+      </svg>
+
+      <svg class="mark mark-corp" viewBox="0 0 400 400" aria-hidden="true">
+        <defs>
+          <clipPath id="corpflat"><rect x="0" y="110" width="400" height="180"/></clipPath>
+        </defs>
+        <g>
+          <g clip-path="url(#corpflat)">
+            <polyline points="60,50 130,290 200,50 270,290 340,50"
+                      fill="none" stroke="currentColor" stroke-width="50"
+                      stroke-linejoin="miter" stroke-miterlimit="40"/>
+          </g>
+          <g fill="currentColor" opacity="0.28">
+            <polygon points="103,110 157,110 130,200"/>
+            <polygon points="243,110 297,110 270,200"/>
+            <polygon points="156,290 244,290 200,139"/>
+          </g>
         </g>
       </svg>
     </div>

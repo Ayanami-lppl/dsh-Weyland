@@ -10,6 +10,8 @@ Nothing inside the DeepSeek Harness install directory is touched.
     duration_ms    length of the animation; must match splash/splash.css
     warm_start_ms  when to pre-launch the app so it is already up when the
                    animation ends; null to launch only after it finishes
+    emblem         "circle" (the ring and monogram) or "corp" (the corporate
+                   wedge); both ship in the markup, this picks one
 
 Any failure -- missing WebView2, a broken config, an error in the page --
 falls through to launching the app immediately, so the shortcut never
@@ -84,6 +86,8 @@ def load_config():
             cfg["warm_start_ms"] = int(cfg["warm_start_ms"])
         except Exception:
             cfg["warm_start_ms"] = None
+    emblem = str(cfg.get("emblem") or "circle").strip().lower()
+    cfg["emblem"] = emblem if emblem in ("circle", "corp") else "circle"
     return cfg
 
 
@@ -131,6 +135,22 @@ def run_splash(cfg):
         background_color="#000000",
     )
     _state["window"] = window
+
+    # The page starts on the markup's default emblem; swap it as soon as the
+    # page answers, which is before the mark is revealed at ~1s.
+    emblem = cfg.get("emblem", "circle")
+    if emblem != "circle":
+        def apply_emblem():
+            deadline = time.time() + 5
+            while time.time() < deadline:
+                try:
+                    if window.evaluate_js("typeof window.__setEmblem === 'function'"):
+                        window.evaluate_js("window.__setEmblem(%r)" % emblem)
+                        return
+                except Exception:
+                    pass
+                time.sleep(0.03)
+        threading.Thread(target=apply_emblem, daemon=True).start()
 
     # start the app before the tube dies, so it is up by the time the
     # animation ends; our window is topmost, so it stays covered.

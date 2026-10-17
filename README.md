@@ -154,10 +154,25 @@ $s.Save()
 | `app` | string | `""` | 要启动的程序完整路径。支持 `~` 和 `%环境变量%`。留空或路径不存在时自动探测 |
 | `duration_ms` | number | `8000` | 动画时长（毫秒）。**修改时必须与 `splash/splash.css` 的时间轴一致** |
 | `warm_start_ms` | number \| null | `6900` | 在动画的第几毫秒**提前**把应用拉起来，这样动画结束时应用已经就绪。设为 `null` 则播完才启动 |
+| `emblem` | string | `"circle"` | 徽记样式：`circle`（圆环 + 字母组合）或 `corp`（企业方块标）。两种都内置在动画里，这个字段决定显示哪个 |
 
 ---
 
 ## 自定义
+
+### 切换徽记样式
+
+动画内置两种徽记，**随时可换**：
+
+| `emblem` | 样子 |
+| :--- | :--- |
+| `circle` | 圆环 + 四向刻度 + W-Y 字母组合（默认） |
+| `corp` | 企业方块标：黄色 W 楔形 + 三处负空间三角 |
+
+- **方式 A**：改 `config.json` 的 `emblem`，然后重跑一次 `python plugin/install.py`，重启应用。
+  也可以临时指定：`python plugin/install.py --emblem corp`。
+- **方式 B**：改 `config.json` 的 `emblem`，重新启动器即可。
+- **浏览器预览**：`splash/index.html?emblem=corp&t=6800`
 
 ### 换荧光色
 

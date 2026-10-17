@@ -226,8 +226,16 @@ def scoped(css):
     return css
 
 
-def render(alternate):
+def render(alternate, emblem):
     markup = extract_markup(read(os.path.join(SPLASH, "index.html")))
+    if emblem in ("circle", "corp"):
+        # both marks ship in the markup; this picks which one is displayed.
+        # It has to live on .glyphwrap rather than <html>, because the ident
+        # renders inside a shadow root that cannot see the document root.
+        markup, swapped = re.subn(r'data-emblem="[^"]*"',
+                                  'data-emblem="%s"' % emblem, markup, count=1)
+        if swapped != 1:
+            raise SystemExit("could not find data-emblem in the markup")
     css = scoped(read(os.path.join(SPLASH, "splash.css")))
 
     if 'class="screen"' not in markup or "fx-poweroff" not in markup:
@@ -247,10 +255,19 @@ def render(alternate):
 
 def main():
     alternate = "--alternate" in sys.argv
-    out = render(alternate)
+    emblem = "circle"
+    if "--emblem" in sys.argv:
+        index = sys.argv.index("--emblem")
+        if index + 1 >= len(sys.argv):
+            raise SystemExit("--emblem needs a value: circle or corp")
+        emblem = sys.argv[index + 1]
+        if emblem not in ("circle", "corp"):
+            raise SystemExit("--emblem must be circle or corp")
+    out = render(alternate, emblem)
 
     print("source  :", SPLASH)
     print("mode    :", "alternate (shares the machine)" if alternate else "always play")
+    print("emblem  :", emblem)
     print("result  : %d bytes" % len(out))
 
     if "--check" in sys.argv:

@@ -82,9 +82,15 @@ window.__ModuleLoader__.load({
 \t\t\treturn turnMix(Math.floor(Date.now() / TURN_BUCKET_MS)) %% 3;
 \t\t}
 
-\t\tfunction chosenEmblem(slot) {
+\t\tfunction chosenEmblem() {
 \t\t\tif (EMBLEM !== "rotate") return EMBLEM;
-\t\t\treturn slot === 1 ? "circle" : "corp";
+\t\t\tconst h = turnMix(Math.floor(Date.now() / TURN_BUCKET_MS));
+\t\t\t// With a rival card the three slots split evenly and slot 1 is the
+\t\t\t// circle. Without one, slot 2 falls to us as well, so three slots
+\t\t\t// would skew it to corp -- use an independent bit for a clean 50/50.
+\t\t\treturn ALTERNATE
+\t\t\t\t? (h %% 3 === 1 ? "circle" : "corp")
+\t\t\t\t: (h %% 2 === 0 ? "corp" : "circle");
 \t\t}
 
 \t\t/**
@@ -202,7 +208,7 @@ window.__ModuleLoader__.load({
 \t\tfunction apply(ctx) {
 \t\t\tconst slot = introSlot();
 \t\t\tif (ALTERNATE && slot === 2) return;
-\t\t\tconst emblem = chosenEmblem(slot);
+\t\t\tconst emblem = chosenEmblem();
 \t\t\ttry {
 \t\t\t\tctx.slots.inject("shell.overlay", function* () {
 \t\t\t\t\tyield ctx.slots.register({ name: "shell.overlay", id: "weyland-intro" },
